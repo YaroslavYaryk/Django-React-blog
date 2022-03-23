@@ -2,6 +2,7 @@
 
 Full Rest API blog site created by using Django as backEnd language, and React JS for frontEnd part.
 When we open site we need to login or sign up first, without doing this we can't see blogs
+
 ![](img/login.png)
 ![](img/registration.png)
 
