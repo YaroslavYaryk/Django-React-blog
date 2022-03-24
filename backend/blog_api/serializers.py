@@ -8,6 +8,8 @@ from django.contrib.auth.models import User
 
 from django.forms.models import model_to_dict
 
+from .services.comment_view import get_user_by_id
+
 
 class AuthorSerializer(ModelSerializer):
     class Meta:
@@ -77,8 +79,18 @@ class CommentGetSerializer(ModelSerializer):
         return foo.user.username
 
     def get_children_comments(self, foo):
-        
-        return foo.children().values()
+
+        return [
+            {
+                "id": el.id,
+                "user_id": el.user_id,
+                "blog_item_id": el.blog_item_id,
+                "blog_body": el.blog_body,
+                "parent_id": el.parent_id,
+                "username": get_user_by_id(el.user_id).username,
+            }
+            for el in foo.children()
+        ]
 
     class Meta:
         model = BlogComment

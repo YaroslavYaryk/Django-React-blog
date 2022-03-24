@@ -1,8 +1,13 @@
 from blog.models import BlogItem, Author, BlogLike, BlogComment, CommentLike
+from django.contrib.auth.models import User
 
 
 def get_blog_by_id(blog_id):
     return BlogItem.objects.get(pk=blog_id)
+
+
+def get_user_by_id(id):
+    return User.objects.get(pk=id)
 
 
 def create_comment(user, blog_item, blog_body, parent):

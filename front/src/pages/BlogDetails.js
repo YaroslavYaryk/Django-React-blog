@@ -397,7 +397,7 @@ const BlogDetails = () => {
 								{child.id !== commentEdit ? (
 									<div className="comment__stuff-reply">
 										<div className="user-comment-reply">
-											<h5>{child.user_id}</h5>
+											<h5>{child.username}</h5>
 											<p>{child.blog_body}</p>
 										</div>
 										<div className="comment-update-block">
