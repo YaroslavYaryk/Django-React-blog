@@ -1,9 +1,9 @@
 import { useState, useEffect, useContext } from "react";
 import axios from "axios";
-import { useHistory } from 'react-router-dom';
 import useFetch from "../hooks/useFetch"
 import { useParams } from "react-router-dom";
 import AuthContext from "../context/AuthContext"
+import { useHistory } from 'react-router-dom';
 
 
 const UpdateBlog = ({ }) => {
@@ -12,32 +12,24 @@ const UpdateBlog = ({ }) => {
 	const { authToken, user } = useContext(AuthContext);
 
 	const { data: blog, isPending } = useFetch('http://127.0.0.1:8000/api/blogs/' + id);
-	console.log(blog)
 	const [title, setTitle] = useState('');
 	const [body, setBody] = useState('');
 	const [isPending2, setIsPending2] = useState(false);
-	const [author, setAuthor] = useState('');
 
 
 	useEffect(() => {
 		if (blog) {
 			setTitle(blog.title);
 			setBody(blog.body);
-			setAuthor(blog.author.name);
 		}
 	}, [blog])
-
-	const { data: authors, isPending: somt } = useFetch("http://localhost:8000/api/authors/");
 
 	const history = useHistory();
 
 	const handleSubmit = (e) => {
 
-		const authorId = authors.find(a => a.name === author).id;
+		const blogs = { title: title, body: body }
 
-		const blogs = { title: title, body: body, author: authorId }
-
-		console.log(blogs)
 		setIsPending2(true);
 
 		axios.put("http://localhost:8000/api/update/" + id, blogs, {
@@ -47,7 +39,8 @@ const UpdateBlog = ({ }) => {
 		})
 			.then(() => {
 				setIsPending2(false)
-				history.push("/")
+
+				history.goBack()
 
 			})
 		e.preventDefault();
@@ -70,15 +63,7 @@ const UpdateBlog = ({ }) => {
 					value={body}
 					onChange={(e) => setBody(e.target.value)}
 				></textarea>
-				<label>Blog author:</label>
-				<select
-					value={author}
-					onChange={(e) => setAuthor(e.target.value)}
-				>
-					{authors && authors.map((author) => (
-						<option value={author.name}>{author.name}</option>
-					))}
-				</select>
+
 				{isPending2 && <div>Updating blog</div>}
 				{!isPending2 && <button>Update Blog</button>}
 

@@ -8,19 +8,10 @@ class BlogItem(models.Model):
 
     title = models.CharField(max_length=100)
     body = models.TextField()
-    author = models.ForeignKey("Author", on_delete=models.CASCADE)
-    creation_date = models.DateTimeField(auto_now_add=True, null=True)
+    author = models.ForeignKey(User, on_delete=models.CASCADE, db_constraint=False)
 
     def __str__(self):
         return f"BlogItem({self.title}, {self.body})"
-
-
-class Author(models.Model):
-
-    name = models.CharField(max_length=100)
-
-    def __str__(self):
-        return self.name
 
 
 class BlogLike(models.Model):
@@ -38,9 +29,7 @@ class BlogComment(models.Model):
     blog_item = models.ForeignKey(BlogItem, on_delete=models.CASCADE)
     blog_body = models.TextField()
 
-    parent = models.ForeignKey("self", on_delete=models.CASCADE, null=True, blank=True)
-
-    creation_date = models.DateTimeField(auto_now_add=True)
+    parent = models.ForeignKey("self", on_delete=models.CASCADE, blank=True, null=True)
 
     def __str__(self):
         return f"BlogComment({self.user}, {self.blog_item}, {self.blog_body})"

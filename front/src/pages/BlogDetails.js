@@ -300,8 +300,8 @@ const BlogDetails = () => {
 			{blog && (
 				<article>
 					<h2>{blog.title}</h2>
-					<p>Written by {blog.author.name}</p>
 					<div>{blog.body}</div>
+					<p>Written by {blog.author.username}</p>
 					<div className="block__bottom">
 						{!isPending2 && <button className="btn__update del-post" onClick={handledelete}>Delete blog</button>}
 						{isPending2 && <button className="btn__update del-post">Deleting blog...</button>}
@@ -333,7 +333,7 @@ const BlogDetails = () => {
 			</div>
 
 			<div className="user-comments-block">
-				<h4>Other comments</h4>
+				{blogComments && blogComments.length ? <h4>Other comments</h4> : ""}
 				{blogComments && blogComments.map(comment => (
 					<div className="comment">
 						{comment.id !== commentEdit ? (

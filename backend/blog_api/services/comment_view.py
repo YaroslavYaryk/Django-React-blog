@@ -1,4 +1,4 @@
-from blog.models import BlogItem, Author, BlogLike, BlogComment, CommentLike
+from blog.models import BlogItem, BlogLike, BlogComment, CommentLike
 from django.contrib.auth.models import User
 
 

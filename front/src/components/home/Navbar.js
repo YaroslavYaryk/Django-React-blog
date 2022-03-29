@@ -15,7 +15,10 @@ const Navbar = () => {
 				<Link to="/">Home</Link>
 
 				{user ? (
-					<div className="block__link"><Link onClick={logoutUser} >Logout</Link></div>
+					<div className="block__link">
+						<div className="block__link"><Link onClick={logoutUser} >Logout</Link></div>
+						<div className="block__link" ><Link to="/profile">Profile</Link></div>
+					</div>
 
 				) : (
 					<div className="block__link">

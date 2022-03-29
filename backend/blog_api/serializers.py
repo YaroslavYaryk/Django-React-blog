@@ -1,5 +1,5 @@
 import json
-from blog.models import Author, BlogItem, BlogLike, BlogComment, CommentLike
+from blog.models import BlogItem, BlogLike, BlogComment, CommentLike
 from rest_framework.serializers import ModelSerializer, SerializerMethodField
 
 from django.core import serializers
@@ -11,15 +11,17 @@ from django.forms.models import model_to_dict
 from .services.comment_view import get_user_by_id
 
 
-class AuthorSerializer(ModelSerializer):
+class UserGetSerializer(ModelSerializer):
     class Meta:
-        model = Author
-        fields = "__all__"
+        model = User
+        exclude = [
+            "password",
+        ]
 
 
 class BlogSerializer(ModelSerializer):
 
-    author = AuthorSerializer()
+    author = UserGetSerializer()
 
     class Meta:
         model = BlogItem
@@ -29,21 +31,13 @@ class BlogSerializer(ModelSerializer):
 class BlogPostSerializer(ModelSerializer):
     class Meta:
         model = BlogItem
-        fields = "__all__"
+        fields = "title", "body"
 
 
 class UserSerializer(ModelSerializer):
     class Meta:
         model = User
         fields = "username", "password"
-
-
-class UserGetSerializer(ModelSerializer):
-    class Meta:
-        model = User
-        exclude = [
-            "password",
-        ]
 
 
 class LikeGetSerializer(ModelSerializer):

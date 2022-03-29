@@ -1,13 +1,12 @@
 from rest_framework import status
 from rest_framework.views import APIView
 from rest_framework.response import Response
-from blog.models import BlogItem, Author, BlogLike, BlogComment, CommentLike
+from blog.models import BlogItem, BlogLike, BlogComment, CommentLike
 import requests
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.decorators import api_view, permission_classes
 from .serializers import (
     BlogSerializer,
-    AuthorSerializer,
     BlogPostSerializer,
     UserSerializer,
     LikeSerializer,
@@ -40,10 +39,15 @@ class BlogView(APIView):
         return Response(serializer.data)
 
     def post(self, request):
-        serializer = BlogPostSerializer(data=request.data)
+        data = {**request.data, "author": request.user}
+        serializer = BlogPostSerializer(data=data)
 
         if serializer.is_valid():
-            serializer.save()
+            BlogItem.objects.create(
+                title=request.data["title"],
+                body=request.data["body"],
+                author=request.user,
+            )
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
@@ -60,18 +64,6 @@ class BlogView(APIView):
         post = BlogItem.objects.get(pk=pk)
         post.delete()
         return Response({"message": "Item was succesfully deleted"})
-
-
-class AuthorView(APIView):
-    def get(self, request, *args, **kwargs):
-
-        if kwargs:
-            queryset = Author.objects.get(pk=kwargs["pk"])
-            serializer = AuthorSerializer(queryset)
-        else:
-            queryset = Author.objects.all()
-            serializer = AuthorSerializer(queryset, many=True)
-        return Response(serializer.data)
 
 
 class UserView(APIView):
@@ -224,3 +216,14 @@ def check_comment_like_exists(request, comment_id):
         return Response({"result": True})
     except Exception as e:
         return Response({"result": False})
+
+
+@api_view(["GET"])
+@permission_classes([IsAuthenticated])
+def get_blogs_for_user(request):
+
+    user = request.user
+    queryset = user.blogitem_set.all()
+
+    serializer = BlogSerializer(queryset, many=True)
+    return Response(serializer.data)

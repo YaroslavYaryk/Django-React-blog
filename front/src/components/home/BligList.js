@@ -83,7 +83,7 @@ const BlogList = ({ blogs, title, handleDelete }) => {
 					<div className="block__left">
 						<Link to={`/blogs/${blog.id}`}><h2>{blog.title}</h2></Link>
 						{/* <p>{blog.body}</p> */}
-						<p>Written by {blog.author.name}</p>
+						<p>Written by {blog.author.username}</p>
 					</div>
 					<div className="blog__right">
 						<a onClick={(e) => likeBlog(e, blog.id)} className="liked-button" id="like-button" data-item="05" value={blog.id}>
