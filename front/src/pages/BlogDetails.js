@@ -300,7 +300,7 @@ const BlogDetails = () => {
 			{blog && (
 				<article>
 					<h2>{blog.title}</h2>
-					<div>{blog.body}</div>
+					<div className="blog_body">{blog.body}</div>
 					<p>Written by {blog.author.username}</p>
 					<div className="block__bottom">
 						{!isPending2 && <button className="btn__update del-post" onClick={handledelete}>Delete blog</button>}
