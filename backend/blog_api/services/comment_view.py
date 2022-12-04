@@ -19,7 +19,7 @@ def create_comment(user, blog_item, blog_body, parent):
         except:
             pass
 
-    BlogComment.objects.create(
+    return BlogComment.objects.create(
         blog_item=blog_item, user=user, blog_body=blog_body, parent=parent_obj
     )
 
@@ -29,8 +29,10 @@ def press_like_to_comment(request, comment_id):
     user = request.user
     comment = BlogComment.objects.get(id=comment_id)
     like = CommentLike.objects.filter(user=user, comment_blog_item=comment)
-    print(like)
+
     if like:
         like.delete()  # thre is like put
     else:
-        CommentLike.objects.create(user=user, comment_blog_item=comment)  # create like
+        return CommentLike.objects.create(
+            user=user, comment_blog_item=comment
+        ).id  # create like

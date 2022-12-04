@@ -1,75 +1,76 @@
-import { useState, useEffect, useContext } from "react";
-import axios from "axios";
-import useFetch from "../hooks/useFetch"
+import { useState, useEffect, useContext, useCallback } from "react";
+
 import { useParams } from "react-router-dom";
-import AuthContext from "../context/AuthContext"
-import { useHistory } from 'react-router-dom';
+import AuthContext from "../context/AuthContext";
+import { useHistory } from "react-router-dom";
+import { useDispatch, useSelector } from "react-redux";
+import * as blogActions from "../store/actions/blogActions";
 
+const UpdateBlog = () => {
+  const dispatch = useDispatch();
 
-const UpdateBlog = ({ }) => {
+  const { id } = useParams();
+  const { authToken } = useContext(AuthContext);
 
-	const { id } = useParams();
-	const { authToken, user } = useContext(AuthContext);
+  var blog = useSelector((state) =>
+    state.blogs.blogs.find((el) => el.id === parseInt(id))
+  );
+  const [title, setTitle] = useState("");
+  const [body, setBody] = useState("");
+  const [error, setError] = useState("");
+  const [isLoading, setIsLoading] = useState("");
 
-	const { data: blog, isPending } = useFetch('http://127.0.0.1:8000/api/blogs/' + id);
-	const [title, setTitle] = useState('');
-	const [body, setBody] = useState('');
-	const [isPending2, setIsPending2] = useState(false);
+  useEffect(() => {
+    if (blog) {
+      setTitle(blog.title);
+      setBody(blog.body);
+    }
+  }, [blog]);
 
+  const history = useHistory();
 
-	useEffect(() => {
-		if (blog) {
-			setTitle(blog.title);
-			setBody(blog.body);
-		}
-	}, [blog])
+  const handleSubmit = useCallback(
+    async (e) => {
+      const blog = { title: title, body: body };
 
-	const history = useHistory();
+      e.preventDefault();
+      setError(null);
+      setIsLoading(true);
+      try {
+        dispatch(blogActions.editBlog(authToken, blog, id));
+      } catch (error) {
+        console.log(error);
+        setError(error.message);
+      }
+      setIsLoading(false);
+      history.push("/");
+    },
+    [dispatch, history, authToken, body, title, id]
+  );
 
-	const handleSubmit = (e) => {
+  return (
+    <div className="create">
+      <h2>Update current blog</h2>
+      <form onSubmit={handleSubmit}>
+        <label>Blog title:</label>
+        <input
+          type="text"
+          required
+          value={title}
+          onChange={(e) => setTitle(e.target.value)}
+        />
+        <label>Blog body:</label>
+        <textarea
+          required
+          value={body}
+          onChange={(e) => setBody(e.target.value)}
+        ></textarea>
 
-		const blogs = { title: title, body: body }
-
-		setIsPending2(true);
-
-		axios.put("http://localhost:8000/api/update/" + id, blogs, {
-			headers: {
-				Authorization: `Bearer ${authToken.access}`
-			}
-		})
-			.then(() => {
-				setIsPending2(false)
-
-				history.goBack()
-
-			})
-		e.preventDefault();
-	}
-
-	return (
-		<div className="create">
-			<h2>Update current blog</h2>
-			<form onSubmit={handleSubmit}>
-				<label>Blog title:</label>
-				<input
-					type="text"
-					required
-					value={title}
-					onChange={(e) => setTitle(e.target.value)}
-				/>
-				<label>Blog body:</label>
-				<textarea
-					required
-					value={body}
-					onChange={(e) => setBody(e.target.value)}
-				></textarea>
-
-				{isPending2 && <div>Updating blog</div>}
-				{!isPending2 && <button>Update Blog</button>}
-
-			</form>
-		</div>
-	);
-}
+        {isLoading && <div>Updating blog</div>}
+        {!isLoading && <button>Update Blog</button>}
+      </form>
+    </div>
+  );
+};
 
 export default UpdateBlog;

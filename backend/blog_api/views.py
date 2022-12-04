@@ -41,7 +41,7 @@ class BlogView(APIView):
     def post(self, request):
         data = {**request.data, "author": request.user}
         serializer = BlogPostSerializer(data=data)
-
+        print(data)
         if serializer.is_valid():
             BlogItem.objects.create(
                 title=request.data["title"],
@@ -49,6 +49,7 @@ class BlogView(APIView):
                 author=request.user,
             )
             return Response(serializer.data, status=status.HTTP_201_CREATED)
+        print(serializer.errors)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
     def put(self, request, pk):
@@ -118,8 +119,10 @@ class LikeView(APIView):
     def post(self, request, *args, **kwargs):
         serializer = LikeSerializer(data=request.data)
         if serializer.is_valid():
-            press_like_to_product(request, request.data["blog_item"])
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
+            like_id = press_like_to_product(request, request.data["blog_item"])
+            return Response(
+                {**serializer.data, "like_id": like_id}, status=status.HTTP_201_CREATED
+            )
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
@@ -156,9 +159,9 @@ class CommentBlogView(APIView):
 
         if serializer.is_valid():
             print(serializer.data)
-            create_comment(**serializer.data, user=request.user)
+            comment = create_comment(**serializer.data, user=request.user)
             return Response(
-                CommentGetSerializer(BlogComment.objects.all(), many=True).data,
+                CommentGetSerializer(instance=comment).data,
                 status=status.HTTP_201_CREATED,
             )
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
@@ -167,10 +170,10 @@ class CommentBlogView(APIView):
         post = BlogComment.objects.get(pk=pk)
         data = {**request.data, "user": request.user.id}
         serializer = CommentPutSerializer(instance=post, data=data)
-        print(serializer)
         if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
+            instance = serializer.save()
+            newSerializer = CommentGetSerializer(instance=instance)
+            return Response(newSerializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
     def delete(self, requset, pk):
@@ -201,8 +204,10 @@ class CommentLikeView(APIView):
         print(request.data)
         print(serializer.is_valid())
         if serializer.is_valid():
-            press_like_to_comment(request, request.data["comment_blog_item"])
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
+            like_id = press_like_to_comment(request, request.data["comment_blog_item"])
+            return Response(
+                {**serializer.data, "like_id": like_id}, status=status.HTTP_201_CREATED
+            )
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
