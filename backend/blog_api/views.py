@@ -25,8 +25,7 @@ from .services.comment_view import create_comment, press_like_to_comment
 
 
 class BlogView(APIView):
-
-    permission_classes = [IsAuthenticated]
+    # permission_classes = [IsAuthenticated]
 
     def get(self, request, *args, **kwargs):
 
@@ -41,7 +40,6 @@ class BlogView(APIView):
     def post(self, request):
         data = {**request.data, "author": request.user}
         serializer = BlogPostSerializer(data=data)
-        print(data)
         if serializer.is_valid():
             BlogItem.objects.create(
                 title=request.data["title"],
@@ -49,7 +47,6 @@ class BlogView(APIView):
                 author=request.user,
             )
             return Response(serializer.data, status=status.HTTP_201_CREATED)
-        print(serializer.errors)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
     def put(self, request, pk):
@@ -58,7 +55,7 @@ class BlogView(APIView):
 
         if serializer.is_valid():
             serializer.save()
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
+            return Response(serializer.data, status=status.HTTP_200_OK)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
     def delete(self, requset, pk):
@@ -83,7 +80,6 @@ class UserView(APIView):
             "password": f"{request.data['password']}",
         }
         serializer = UserSerializer(data=data)
-        print(request.data, serializer.is_valid())
         if serializer.is_valid():
             User.objects.create_user(
                 username=request.data["username"], password=request.data["password"]
@@ -103,7 +99,6 @@ class UserView(APIView):
 
 
 class LikeView(APIView):
-
     permission_classes = [IsAuthenticated]
 
     def get(self, request, *args, **kwargs):
@@ -129,17 +124,15 @@ class LikeView(APIView):
 @api_view(["GET"])
 @permission_classes([IsAuthenticated])
 def check_blog_like_exists(request, blog_id):
-
     user = request.user
     try:
         BlogLike.objects.get(user=user, blog_item_id=blog_id)
-        return Response({"result": True})
+        return Response({"result": True}, status=status.HTTP_200_OK)
     except Exception as e:
-        return Response({"result": False})
+        return Response({"result": False}, status=status.HTTP_200_OK)
 
 
 class CommentBlogView(APIView):
-
     permission_classes = [IsAuthenticated]
 
     def get(self, request, *args, **kwargs):
@@ -158,7 +151,6 @@ class CommentBlogView(APIView):
         serializer = CommentPostSerializer(data=request.data)
 
         if serializer.is_valid():
-            print(serializer.data)
             comment = create_comment(**serializer.data, user=request.user)
             return Response(
                 CommentGetSerializer(instance=comment).data,
@@ -173,7 +165,7 @@ class CommentBlogView(APIView):
         if serializer.is_valid():
             instance = serializer.save()
             newSerializer = CommentGetSerializer(instance=instance)
-            return Response(newSerializer.data, status=status.HTTP_201_CREATED)
+            return Response(newSerializer.data, status=status.HTTP_200_OK)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
     def delete(self, requset, pk):
@@ -183,7 +175,6 @@ class CommentBlogView(APIView):
 
 
 class CommentLikeView(APIView):
-
     permission_classes = [IsAuthenticated]
 
     def get(self, request, *args, **kwargs):
@@ -191,7 +182,6 @@ class CommentLikeView(APIView):
             queryset = CommentLike.objects.filter(
                 comment_blog_item__blog_item__pk=kwargs["comment_blog_item_pk"]
             )
-            print(queryset)
             serializer = CommentLikeGetSerializer(queryset, many=True)
         else:
             queryset = CommentLike.objects.all()
@@ -201,8 +191,6 @@ class CommentLikeView(APIView):
 
     def post(self, request, *args, **kwargs):
         serializer = CommentLikePostSerializer(data=request.data)
-        print(request.data)
-        print(serializer.is_valid())
         if serializer.is_valid():
             like_id = press_like_to_comment(request, request.data["comment_blog_item"])
             return Response(
@@ -214,7 +202,6 @@ class CommentLikeView(APIView):
 @api_view(["GET"])
 @permission_classes([IsAuthenticated])
 def check_comment_like_exists(request, comment_id):
-
     user = request.user
     try:
         CommentLike.objects.get(user=user, comment_blog_item__id=comment_id)
@@ -226,7 +213,6 @@ def check_comment_like_exists(request, comment_id):
 @api_view(["GET"])
 @permission_classes([IsAuthenticated])
 def get_blogs_for_user(request):
-
     user = request.user
     queryset = user.blogitem_set.all()
 
